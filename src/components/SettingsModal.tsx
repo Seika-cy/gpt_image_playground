@@ -1641,24 +1641,28 @@ export default function SettingsModal() {
                       开启后请求以流式传输，并非所有服务商和网关都支持此功能。官方接口在流式模式下不发送心跳，需要配合请求中间步骤图像来维持连接，避免超时断开。官方接口仅支持单图流式传输，因此数量大于 1 时会将多图生成拆分为并发单图。
                     </div>
                   </div>
-                  <label className={`block ${activeProfile.streamImages ? '' : 'opacity-60'}`}>
-                    <span className="mb-1.5 block text-sm text-gray-600 dark:text-gray-300">请求中间步骤图像数</span>
-                    <Select
-                      value={normalizeStreamPartialImages(activeProfile.streamPartialImages)}
-                      onChange={(value) => updateActiveProfile({ streamPartialImages: normalizeStreamPartialImages(value) }, true)}
-                      disabled={!activeProfile.streamImages}
-                      options={[
-                        { label: '0，不请求', value: 0 },
-                        { label: '1 张', value: 1 },
-                        { label: '2 张', value: 2 },
-                        { label: '3 张', value: 3 },
-                      ]}
-                      className="w-full rounded-xl border border-gray-200/70 bg-white/60 px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-blue-300 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:focus:border-blue-500/50"
-                    />
-                    <div data-selectable-text className="mt-1.5 text-xs text-gray-500 dark:text-gray-500">
+                  <div className={`block ${activeProfile.streamImages ? '' : 'opacity-60'}`}>
+                    <div className="mb-1.5 flex items-center justify-between gap-3">
+                      <span className="block text-sm text-gray-600 dark:text-gray-300">请求中间步骤图像数</span>
+                      <div className="w-28 shrink-0">
+                        <Select
+                          value={normalizeStreamPartialImages(activeProfile.streamPartialImages)}
+                          onChange={(value) => updateActiveProfile({ streamPartialImages: normalizeStreamPartialImages(value) }, true)}
+                          disabled={!activeProfile.streamImages}
+                          options={[
+                            { label: '0，不请求', value: 0 },
+                            { label: '1 张', value: 1 },
+                            { label: '2 张', value: 2 },
+                            { label: '3 张', value: 3 },
+                          ]}
+                          className="w-full rounded-xl border border-gray-200/70 bg-white/60 px-3 py-1.5 text-xs text-gray-700 outline-none transition focus:border-blue-300 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-200 dark:focus:border-blue-500/50"
+                        />
+                      </div>
+                    </div>
+                    <div data-selectable-text className="text-xs text-gray-500 dark:text-gray-500">
                       对应 <code className="rounded bg-gray-100 px-1 py-0.5 dark:bg-white/[0.06]">partial_images</code> 参数（0-3）。建议设为 2 或 3 以避免长时间生成时连接超时断开。实际返回的每张中间图像会产生少量额外计费。设为 0 时不请求中间步骤图像，连接可能因无数据传输而被断开。
                     </div>
-                  </label>
+                  </div>
                 </div>
               )}
 

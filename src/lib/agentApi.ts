@@ -804,11 +804,8 @@ export async function callAgentConversationTitleApi(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// Batch image generation: execute a single image via Responses API
-// Uses the same pattern as gallery Responses API mode:
-//   - PROMPT_REWRITE_GUARD to prevent prompt modification
-//   - tool_choice: 'required' to force immediate generation
-//   - Reference images passed as input_image
+// Batch image generation: execute a single image via Responses API.
+// Uses the same pattern as gallery Responses API mode.
 // ---------------------------------------------------------------------------
 
 const PROMPT_REWRITE_GUARD_PREFIX = 'Use the following text as the complete prompt. Do not rewrite it:'
@@ -822,7 +819,7 @@ export interface BatchImageCallResult {
 }
 
 /**
- * Generate a single image using Responses API with prompt-rewrite guard.
+ * Generate a single image using Responses API.
  * This mirrors the gallery mode's callResponsesImageApiSingle pattern.
  */
 export async function callBatchImageSingle(opts: {
@@ -832,12 +829,13 @@ export async function callBatchImageSingle(opts: {
   prompt: string
   referenceImageDataUrls: string[]
   referenceIds?: string[]
+  allowPromptRewrite?: boolean
   signal?: AbortSignal
   onImageToolStarted?: () => void | Promise<void>
   onPartialImage?: (event: { image: string; partialImageIndex?: number }) => void | Promise<void>
   onImageToolCompleted?: (image: AgentApiResultImage) => void | Promise<void>
 }): Promise<BatchImageCallResult> {
-  const { profile, params, batchItemId, prompt, referenceImageDataUrls, referenceIds, signal, onImageToolStarted, onPartialImage, onImageToolCompleted } = opts
+  const { profile, params, batchItemId, prompt, referenceImageDataUrls, referenceIds, allowPromptRewrite, signal, onImageToolStarted, onPartialImage, onImageToolCompleted } = opts
   const mime = MIME_MAP[params.output_format] || 'image/png'
   const proxyConfig = readClientDevProxyConfig()
   const useApiProxy = shouldUseApiProxy(profile.apiProxy, proxyConfig)
@@ -848,11 +846,11 @@ export async function callBatchImageSingle(opts: {
   signal?.addEventListener('abort', abortFromCaller, { once: true })
 
   try {
-    // Build input: reference id mapping + prompt-rewrite guard + reference images.
     const referenceMapping = referenceImageDataUrls.length > 0
       ? `Attached reference images correspond to these ids, in order: ${(referenceIds ?? []).map((id) => `<ref id="${id}" />`).join(', ') || 'reference images'}.`
       : ''
-    const guardedPrompt = [referenceMapping, `${PROMPT_REWRITE_GUARD_PREFIX}\n${prompt}`].filter(Boolean).join('\n\n')
+    const promptText = allowPromptRewrite ? prompt : `${PROMPT_REWRITE_GUARD_PREFIX}\n${prompt}`
+    const guardedPrompt = [referenceMapping, promptText].filter(Boolean).join('\n\n')
     let input: unknown
     if (referenceImageDataUrls.length > 0) {
       input = [{
